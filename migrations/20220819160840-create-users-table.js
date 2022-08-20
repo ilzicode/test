@@ -7,9 +7,8 @@ module.exports = {
 
       id:{
         type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncreament: true,
-        allowNull: true
+        autoIncrement: true,
+        primaryKey: true
       },
 
       email: {
@@ -25,7 +24,6 @@ module.exports = {
       last_name: {
         type: Sequelize.STRING,
         allowNull: true
-
       },
 
       birthday_date: {

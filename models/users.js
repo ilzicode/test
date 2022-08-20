@@ -5,6 +5,12 @@ module.exports =(Sequelize, DataTypes)=>{
         "users",
         {
 
+            id: {
+                type: DataTypes.INTEGER,
+                autoIncreament: true,
+                primaryKey: true
+            },
+
             email: {
                 type: DataTypes.STRING,
                 allowNull: true
@@ -31,11 +37,11 @@ module.exports =(Sequelize, DataTypes)=>{
                 allowNull: true
             },
 
-
         },
         {
             tableName: 'users',
-            underscored: true
+            underscored: true,
+            initialAutoIncrement: 1
         }
     );
         return users;
