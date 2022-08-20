@@ -1,0 +1,59 @@
+version: '3.3'
+
+networks:
+  node:
+
+services:
+  app:
+    container_name: 'apps'
+    build: .
+    volumes:
+    - .:/app
+    - node_modules:/app/node_modules
+    ports:
+      - 3000:3000
+    stdin_open: true
+    environment:
+      - PORT=3000
+    command: npm start
+    networks:
+    - node
+
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./docker/mysql:/var/lib/mysql
+    networks:
+      - node
+    environment:
+      MYSQL_DATABASE: homestead
+      MYSQL_USER: homestead
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: secret
+      SERVICES_TAGS: dev
+      SERVICES_NAME: mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.2
+    container_name: 'phpmyadmin_node_test'
+    links:
+      - mysql
+    environment:
+      TZ: Asia/Jakarta
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    ports:
+      - 3002:80
+    volumes:
+      - ./volumes/phpmyadmin/sessions:/sessions
+      - ./conf/uploads.ini:/usr/local/etc/php/conf.d/php-phpmyadmin.ini
+    networks:
+      - node
+
+volumes:
+  node_modules:
+
+
