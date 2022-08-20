@@ -9,12 +9,10 @@ const Validator = require("fastest-validator");
 const v = new Validator();
 
 const {users}= require("../models");
-// const { ValidationError } = require('sequelize/types');
 
 
 
 router.get('/',  (req, res,next) =>{
-    console.log('anjeng');
 
     const users = {
         nim: req.body.nim,
@@ -40,13 +38,6 @@ router.post('/', async  (req, res,next) =>{
 
     const validate = v.validate(req.body,schema);
 
-    res.json({
-        status:200,
-        message: validate,
-        data:req.body,
-        length:validate.length
-    })
-
     if (validate.length){
         return res.status(400).json(validate);
     }
@@ -56,6 +47,7 @@ router.post('/', async  (req, res,next) =>{
     } catch (err) {
 
         console.error(err.message);
+
         res.status(400).json({
             message: err.message,
             data:req.body
