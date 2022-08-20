@@ -1,34 +1,27 @@
-module.exports =(sequelize, DataTypes)=>{
 
-    const users= sequelize.define(
+module.exports =(Sequelize, DataTypes)=>{
+
+    const users= Sequelize.define(
         "users",
         {
 
-            // id:{
-            //     type: DataTypes.INTEGER,
-            //     primaryKey: true,
-            //     autoIncreament: true,
-            //     allowNull: true
-            //   },
-
-            timestamp:false,
             email: {
                 type: DataTypes.STRING,
                 allowNull: true
             },
 
-            first_name: {
+            firstName: {
                 type: DataTypes.STRING,
                 allowNull: true
             },
 
-            last_name: {
+            lastName: {
                 type: DataTypes.STRING,
                 allowNull: true
 
             },
 
-            birthday_date: {
+            birthdayDate: {
                 type: DataTypes.DATE,
                 allowNull: true
             },
@@ -36,21 +29,13 @@ module.exports =(sequelize, DataTypes)=>{
             location: {
                 type: DataTypes.STRING,
                 allowNull: true
-
             },
 
-            created_at: {
-                type: DataTypes.DATE,
-                allowNull: true
-            },
 
-            updated_at: {
-                type: DataTypes.DATE,
-                allowNull: true
-            },
         },
         {
             tableName: 'users',
+            underscored: true
         }
     );
         return users;
