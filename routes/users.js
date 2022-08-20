@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const { v4: uuidv4 } = require('uuid');
-uuidv4(); // ⇨ '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
+uuidv4(); 
 
 const bodyParser = require('body-parser');
 
@@ -10,51 +10,54 @@ const v = new Validator();
 
 const {users}= require("../models");
 
-
+var moment = require('moment'); 
+// moment().format();
 
 router.get('/',  (req, res,next) =>{
-
-    const users = {
-        nim: req.body.nim,
-        nama: req.body.nama,
-    };
-
-    res.status(200).json({
-        message: 'get method users',
-        data: users
-    })
+ 
 })
 
 // POST
+
 router.post('/', async  (req, res,next) =>{
 
     const schema = {
         email:"email|required",
-        firstName:"string|optional",
+        firstName:"string|required",
         lastName:"string|optional",
-        birthdayDate:"string|optional",
-        location:"string|optional",
+        birthdayDate:"string|required",
+        timezoneOffset:"number|required",
     };
 
     const validate = v.validate(req.body,schema);
 
+    // server timezone Jakarta +7 GMT
+    const serverTimezoneOffset = -420; 
+    const differentInMinutes = serverTimezoneOffset - req.body.timezoneOffset;
+
+
+    let newDate = moment(req.body.birthdayDate.slice(0,10)+ " 09:00:00", "YYYY-MM-DD hh:mm:ss").add(differentInMinutes, 'minutes').format('YYYY-MM-DD hh:mm:ss');
+
+    req.body.sendingEmailServerTime = newDate;
+
+    req.body.newFullDate = newFullDate;
+
     if (validate.length){
-        return res.status(400).json(validate);
+        return res.status(400).json({
+            error: validate,
+            data: req.body         
+        });
     }
 
     try {
         const user = await users.create(req.body);
     } catch (err) {
-
         console.error(err.message);
-
         res.status(400).json({
             message: err.message,
             data:req.body
         })
-
     }
-
 
     res.json({
         status:200,

@@ -32,8 +32,12 @@ module.exports =(Sequelize, DataTypes)=>{
                 allowNull: true
             },
 
-            location: {
-                type: DataTypes.STRING,
+            timezoneOffset: {
+                type: DataTypes.INTEGER,
+                allowNull: true
+            },
+            sendingEmailServerTime: {
+                type: DataTypes.DATE,
                 allowNull: true
             },
 

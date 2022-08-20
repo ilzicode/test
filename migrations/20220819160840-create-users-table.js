@@ -31,10 +31,14 @@ module.exports = {
         allowNull: true
       },
 
-      location: {
-        type: Sequelize.STRING,
+      timezone_offset: {
+        type: Sequelize.INTEGER,
         allowNull: true
+      },
 
+      sending_email_server_time: {
+        type: Sequelize.DATE,
+        allowNull: true
       },
 
       created_at: {
