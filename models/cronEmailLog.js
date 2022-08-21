@@ -1,51 +1,52 @@
 
 module.exports =(Sequelize, DataTypes)=>{
 
-    const users= Sequelize.define(
-        "users",
+    const cronEmailLog= Sequelize.define(
+        "cronEmailLog",
         {
 
-            id: {
+            id:{
                 type: DataTypes.INTEGER,
                 autoIncrement: true,
                 primaryKey: true
-            },
+              },
 
-            email: {
-                type: DataTypes.STRING,
-                allowNull: true
-            },
-
-            firstName: {
-                type: DataTypes.STRING,
-                allowNull: true
-            },
-
-            lastName: {
-                type: DataTypes.STRING,
-                allowNull: true
-            },
-
-            birthdayDate: {
-                type: DataTypes.DATE,
-                allowNull: true
-            },
-
-            timezoneOffset: {
+              users_id: {
                 type: DataTypes.INTEGER,
                 allowNull: true
-            },
-            sendingEmailServerTime: {
+              },
+
+              is_send: {
+                type: DataTypes.STRING,
+                allowNull: true
+              },
+
+              year: {
+                type: DataTypes.STRING,
+                allowNull: true
+              },
+
+              response: {
+                type: DataTypes.STRING,
+                allowNull: true
+              },
+
+              created_at: {
                 type: DataTypes.DATE,
                 allowNull: true
-            },
+              },
+
+              updated_at: {
+                type: DataTypes.DATE,
+                allowNull: true
+              },
 
         },
         {
-            tableName: 'users',
+            tableName: 'cron_email_log',
             underscored: true,
             initialAutoIncrement: 1
         }
     );
-        return users;
+        return cronEmailLog;
 };
