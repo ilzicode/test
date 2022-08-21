@@ -35,12 +35,10 @@ router.post('/', async (req, res, next) => {
     const serverTimezoneOffset = -420;
     const differentInMinutes = serverTimezoneOffset - req.body.timezoneOffset;
 
-
     let newDate = moment(req.body.birthdayDate.slice(0, 10) + " 09:00:00", "YYYY-MM-DD hh:mm:ss").add(differentInMinutes, 'minutes').format('YYYY-MM-DD hh:mm:ss');
 
     req.body.sendingEmailServerTime = newDate;
 
-    req.body.newFullDate = newFullDate;
 
     if (validate.length) {
         return res.status(400).json({

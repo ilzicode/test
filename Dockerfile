@@ -1,5 +1,7 @@
 FROM node:alpine
 
+ENV TZ="Asia/Jakarta"
+
 WORKDIR /app
 
 COPY package*.json ./
