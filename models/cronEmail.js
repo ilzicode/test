@@ -15,9 +15,6 @@ module.exports = (sequelize, DataTypes) => {
 		}
 	}
 
-	const users = require("./users");
-
-
 	cronEmail.init({
 
 		id: {
@@ -36,20 +33,12 @@ module.exports = (sequelize, DataTypes) => {
 			allowNull: true
 		},
 
-		isSend: {
-			type: DataTypes.STRING,
-			allowNull: true
-		},
         isSuccess: {
 			type: DataTypes.INTEGER,
 			allowNull: true
 		},
-		year: {
-			type: DataTypes.STRING,
-			allowNull: true
-		},
 
-		response: {
+		year: {
 			type: DataTypes.STRING,
 			allowNull: true
 		},
@@ -60,14 +49,11 @@ module.exports = (sequelize, DataTypes) => {
 		},
 
 
-
-
 	}, {
 		sequelize,
 		modelName: 'cronEmail',
-		tableName: 'cron_emails',
+		tableName: 'cron_email',
 		underscored: true,
-
 	});
 
 

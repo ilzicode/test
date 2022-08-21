@@ -1,8 +1,8 @@
 
 module.exports =(Sequelize, DataTypes)=>{
 
-    const cron= Sequelize.define(
-        "cron",
+    const cronEmailLog= Sequelize.define(
+        "cronEmailLog",
         {
             id:{
                 type: DataTypes.INTEGER,
@@ -20,6 +20,11 @@ module.exports =(Sequelize, DataTypes)=>{
                 allowNull: true
               },
 
+              type: {
+                type: DataTypes.STRING,
+                allowNull: true
+              },
+
               year: {
                 type: DataTypes.STRING,
                 allowNull: true
@@ -29,19 +34,14 @@ module.exports =(Sequelize, DataTypes)=>{
                 type: DataTypes.STRING,
                 allowNull: true
               },
-
-              sendingEmailServerTime: {
-                type: DataTypes.DATE,
-                allowNull: true
-            },
-
         },
         {
+            // sequelize,
+            // modelName: 'cronEmail',
             tableName: 'cron_email_log',
             underscored: true,
-            initialAutoIncrement: 1
         }
     );
 
-    return cron;
+    return cronEmailLog;
 };

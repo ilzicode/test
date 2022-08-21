@@ -1,11 +1,8 @@
-const cronEmail = require("./cronemail");
-
 module.exports = (Sequelize, DataTypes) => {
 
     const users = Sequelize.define(
         "users",
         {
-
             id: {
                 type: DataTypes.INTEGER,
                 autoIncrement: true,
@@ -36,6 +33,7 @@ module.exports = (Sequelize, DataTypes) => {
                 type: DataTypes.INTEGER,
                 allowNull: true
             },
+
             sendingEmailServerTime: {
                 type: DataTypes.DATE,
                 allowNull: true
@@ -45,17 +43,8 @@ module.exports = (Sequelize, DataTypes) => {
         {
             tableName: 'users',
             underscored: true,
-            initialAutoIncrement: 1
         }
     );
-
-    // Project.belongsToMany(User, { through: UserProjects, uniqueKey: 'my_custom_unique' })
-
-    // users.hasMany(cronEmail, {
-    //     foreignKey: 'users_id'
-    // });
-
-    // cronEmail.belongsTo(users);
 
     return users;
 };

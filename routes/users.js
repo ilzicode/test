@@ -4,16 +4,14 @@ const { v4: uuidv4 } = require('uuid');
 uuidv4();
 
 const bodyParser = require('body-parser');
-
 const Validator = require("fastest-validator");
 const v = new Validator();
 
 const { users, cronEmail, sequelize } = require("../models");
 
 var moment = require('moment');
-// moment().format();
 
-router.get('/', (req, res, next) => {
+router.put('/', async(req, res, next) => {
 
 })
 
@@ -24,7 +22,7 @@ router.post('/', async (req, res, next) => {
     try {
 
         const schema = {
-            email: "email|required",
+            email: "email|required|unique",
             firstName: "string|required",
             lastName: "string|optional",
             birthdayDate: "string|required",
