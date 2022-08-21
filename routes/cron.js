@@ -9,18 +9,43 @@ const axios = require('axios').default;
 const Validator = require("fastest-validator");
 const v = new Validator();
 
+const db = require('../models');
+const { cronEmail, users } = require("../models");
+const { QueryTypes } = require('sequelize');
 
-const {Op} = require('sequelize');
-
-
-const { cron, users } = require("../models");
+const { Op } = require('sequelize');
 
 var moment = require('moment');
 const { response } = require('../app');
 
 router.get('/', (req, res, next) => {
-    year = moment().tz("Asia/Jakarta").format('YYYY-MM-DD hh:mm:ss');
-    console.log(year);
+
+    // year = moment().tz("Asia/Jakarta").format('YYYY-MM-DD hh:mm:ss');
+    // console.log(year);
+
+    // beda + 6 jam gmt.
+    let differentInMinutes = -360;
+    let serverDifference = -420;
+
+    let offset = differentInMinutes + serverDifference;
+
+
+    let newDate = moment("2022-08-22 09:00:00", "YYYY-MM-DD hh:mm:ss").add(differentInMinutes, 'minutes').format('YYYY-MM-DD hh:mm:ss');
+
+
+    // yg mau di simpan adalah tanggal dan waktu kirim
+    // tanggal apa berubah ? gak dong..
+
+    console.log(newDate);
+
+
+
+
+    // var moment = require('../node_modules/moment');
+
+    // const nowDateTime = moment().tz("Asia/Jakarta").format('YYYY-MM-DD hh:mm:ss');
+
+    // console.log(nowDateTime);
 })
 
 
@@ -39,65 +64,54 @@ router.post('/', async (req, res, next) => {
     // get all valid database to send email
     const nowDateTime = moment().tz("Asia/Jakarta").format('YYYY-MM-DD hh:mm:ss');
 
-    users.hasMany(cron);
-    cron.hasOne(users);
-    cron.belongsTo(users, {
-      foreignKey: {
-        name: 'usersId'
-      }
-    });
 
-    const data = await users.findAll({
+    const nowYear = moment().tz("Asia/Jakarta").format('YYYY');
 
 
-        where: {
-            sendingEmailServerTime: {
-                [Op.gt]: nowDateTime
-            }
-        }
-    });
+    // butuh try catch
 
-
-
-    // res.json({
-    //     status: 200,
-    //     message: data,
-    // })
+    var data = await db.sequelize.query(
+        'SELECT * FROM `users` LEFT JOIN cron_emails on `users`.`id` = `cron_emails`.`users_id` WHERE `cron_emails`.`type`="birthday" and `cron_emails`.`sending_email_server_time` > ' + "'" + nowDateTime + "'" + ' and `cron_emails`.`year` > ' + "'" + nowYear + "'" +';', { type: QueryTypes.SELECT });
 
 
 
     await data.forEach(element => {
 
-        // console.log(element.email);
-        // console.log(element.id);
-
-        // sending email each data
         try {
 
             axios.post('https://email-service.digitalenvision.com.au/send-email', {
                 email: element.email,
-                message: "Happy Birthday to " + element.firstName + " " + element.lastName
+                message: "Happy Birthday to " + element.firstName + " " + element.lastName + ", Hope all your birthday wishes come true!"
 
-            }).then(function (response) {
+            },{ timeout: 3 }
+
+            ).then(function (response) {
 
                 console.log(response.data);
                 const responseMsg = response.data;
 
                 try {
 
-
                     if (response.data.status == "sent") {
-                        var isSend = 1;
 
-                        let nextYear = parseInt(moment(element.sendingEmailServerTime, "YYYY-MM-DD hh:mm:ss").format('YYYY')) + 1;
-                        let time = moment(element.sendingEmailServerTime, "YYYY-MM-DD hh:mm:ss").format('-MM-DD hh:mm:ss');
-                        let newYear = nextYear + time;
+                        let originTime = element.sending_email_server_time;
+
+                        let nextYear = parseInt(element.sending_email_server_time.slice(0, 4)) + 1;
+
+                        let time = originTime.slice(5, 19);
+
+                        let newYear = nextYear + '-' + time;
 
                         console.log('new year ' + newYear);
 
-                        users.update({ sendingEmailServerTime: newYear }, {
+                        cronEmail.update({
+                            isSend: '1',
+                            isSuccess: '1',
+                            year: nextYear,
+                            sendingEmailServerTime: newYear,
+                        }, {
                             where: {
-                              id: element.id
+                                id: element.id
                             }
                         });
 
@@ -112,33 +126,11 @@ router.post('/', async (req, res, next) => {
 
 
                 }
-                try {
-
-                    const insertCronLog = cron.create(
-                        {
-                            usersId: element.id,
-                            response: JSON.stringify(responseMsg),
-                            year: moment().format('YYYY'),
-                            isSend: isSend
-                        }
-                    );
-
-
-
-
-
-                } catch (err) {
-                    console.error(err.message);
-                    // res.status(400).json({
-                    //     message: err.message,
-                    //     data: req.body
-                    // })
-                }
 
 
                 res.json({
                     status: 200,
-                    message: responseMsg,
+                    message: element,
                 })
 
 
@@ -177,7 +169,6 @@ router.post('/', async (req, res, next) => {
 
 
     });
-
 
 
     // res.json({

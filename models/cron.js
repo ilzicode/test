@@ -4,7 +4,6 @@ module.exports =(Sequelize, DataTypes)=>{
     const cron= Sequelize.define(
         "cron",
         {
-
             id:{
                 type: DataTypes.INTEGER,
                 autoIncrement: true,
@@ -31,7 +30,10 @@ module.exports =(Sequelize, DataTypes)=>{
                 allowNull: true
               },
 
-
+              sendingEmailServerTime: {
+                type: DataTypes.DATE,
+                allowNull: true
+            },
 
         },
         {
