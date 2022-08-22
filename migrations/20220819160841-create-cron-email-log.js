@@ -3,7 +3,7 @@
 module.exports = {
     async up(queryInterface, Sequelize) {
 
-        await queryInterface.createTable('users', {
+        await queryInterface.createTable('cron_email_log', {
 
             id: {
                 type: Sequelize.INTEGER,
@@ -11,34 +11,18 @@ module.exports = {
                 primaryKey: true
             },
 
-            email: {
-                type: Sequelize.STRING,
-                allowNull: true,
-                unique: true
-            },
-
-            first_name: {
+            type: {
                 type: Sequelize.STRING,
                 allowNull: true
             },
 
-            last_name: {
-                type: Sequelize.STRING,
-                allowNull: true
-            },
-
-            birthday_date: {
-                type: Sequelize.DATE,
-                allowNull: true
-            },
-
-            location: {
-                type: Sequelize.STRING,
-                allowNull: true
-            },
-
-            timezone_offset: {
+            users_id: {
                 type: Sequelize.INTEGER,
+                allowNull: true
+            },
+
+            response: {
+                type: Sequelize.STRING,
                 allowNull: true
             },
 
@@ -57,6 +41,6 @@ module.exports = {
     },
 
     async down(queryInterface, Sequelize) {
-        await queryInterface.dropTable('users');
+        await queryInterface.dropTable('cron_email_log');
     }
 };

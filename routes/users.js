@@ -1,60 +1,215 @@
 var express = require('express');
 var router = express.Router();
 const { v4: uuidv4 } = require('uuid');
-uuidv4(); // ⇨ '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
+uuidv4();
+const db = require('../models');
+
 const bodyParser = require('body-parser');
-
 const Validator = require("fastest-validator");
-
 const v = new Validator();
 
-const {users}= require("../models");
-// const { ValidationError } = require('sequelize/types');
+const { users, cronEmail, sequelize } = require("../models");
 
+var moment = require('moment');
 
-
-router.get('/',  (req, res,next) =>{
-    console.log('anjeng');
-
-    const users = {
-        nim: req.body.nim,
-        nama: req.body.nama,
-    };
-
-    res.status(200).json({
-        message: 'get method users',
-        data: users
-    })
-})
 
 // POST
-router.post('/', async  (req, res,next) =>{
+
+router.post('/', async (req, res, next) => {
+
+    try {
+
+        const schema = {
+            email: "email|required|unique",
+            firstName: "string|required",
+            lastName: "string|optional",
+            birthdayDate: "string|required",
+            timezoneOffset: "number|required",
+        };
+
+        const validate = v.validate(req.body, schema);
+
+        if (validate.length) {
+            return res.status(400).json({
+                error: validate,
+                data: req.body
+            });
+        }
+
+        // server timezone Jakarta +7 GMT //420/ 7
+        const serverTimezoneOffset = -420;
+
+        const differentInMinutes = serverTimezoneOffset - req.body.timezoneOffset;
+
+        let sendTimeGMT7 = moment(req.body.birthdayDate.slice(0, 10) + " 09:00:00", "YYYY-MM-DD hh:mm:ss").add(differentInMinutes, 'minutes').format('YYYY-MM-DD hh:mm:ss');
+
+        let transaction;
+        try {
+            transaction = await sequelize.transaction();
+            const user = await users.create(req.body, { transaction });
+
+            await cronEmail.create({
+                type: 'birthday',
+                sendingEmailServerTime: sendTimeGMT7,
+                usersId: user.id
+            }, { transaction });
+
+            console.log('success');
+            await transaction.commit();
+
+        } catch (err) {
+            console.log('error');
+            if (transaction) {
+                await transaction.rollback();
+            }
+
+            console.error(err.message);
+
+            res.status(400).json({
+                message: err.message,
+                data: req.body
+            })
+
+        }
+
+        res.json({
+            status: 200,
+            message: 'berhasil',
+            data: req.body,
+        })
 
 
-    const schema = {
-        email:"string",
-        first_name:"string",
-        last_name:"string",
-        birthday_date:"string",
-        location:"string",
-        created_at:"string",
-        updated_at: "string",
-    };
+    } catch (error) {
 
-    const validate = v.validate(req.body,schema);
-
-    if(validate.lenght){
-        return res.status(400).json(validate);
     }
 
-    // proses create
 
-    console.log(req.body);
-    const user = await users.create(req.body)
 
-    res.status(200).json({
-        message: 'sukses create data'
-    })
+
+
+
+
 })
 
+
+router.delete('/', async (req, res, next) => {
+
+    try {
+
+        const schema = {
+            email: "email|required",
+        };
+
+        const validate = v.validate(req.body, schema);
+
+        if (validate.length) {
+            return res.status(400).json({
+                error: validate,
+                data: req.body
+            });
+        }
+
+        let transaction;
+        try {
+            transaction = await sequelize.transaction();
+
+            const test = await users.destroy({
+                where: { email: req.body.email }, transaction
+            });
+
+            // delete related database jg harusnya..
+
+            // await City.destroy({
+            //     where: { email:req.body.email }, transaction
+            // });
+
+            console.log('success');
+            await transaction.commit();
+
+        } catch (err) {
+            console.log('error');
+            if (transaction) {
+                await transaction.rollback();
+            }
+
+            console.error(err.message);
+
+            res.status(400).json({
+                message: err.message,
+                data: req.body
+            })
+
+        }
+
+        res.json({
+            status: 200,
+            message: 'berhasil hapus data',
+            data: req.body,
+        })
+
+    } catch (error) {
+
+    }
+})
+
+router.put('/:id', async (req, res, next) => {
+
+
+    try {
+        const id = req.params.id;
+
+        let user = await users.findByPk(id);
+
+        if (!user) {
+            return res.status(404).json({
+                status: 404,
+                message: 'user not found'
+            })
+        }
+
+        //validation
+        const schema = {
+            email: "email|required|unique",
+            firstName: "string|required",
+            lastName: "string|optional",
+            birthdayDate: "string|required",
+            timezoneOffset: "number|required",
+        };
+
+        const validate = v.validate(req.body, schema);
+
+        if (validate.length) {
+            return res.status(400).json({
+                error: validate,
+                data: req.body
+            });
+        }
+
+        let updateData = await users.update(
+            {
+                email: req.body.email,
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,            },
+            {
+              where: {
+                id:  req.params.id,
+              },
+            }
+        );
+
+        res.json({
+            status: 200,
+            message: "success update",
+            updateData: updateData
+        })
+
+    } catch (error) {
+        console.log(error);
+    }
+
+
+});
+
+
 module.exports = router;
+

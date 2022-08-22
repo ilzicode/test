@@ -1,57 +1,48 @@
-module.exports =(sequelize, DataTypes)=>{
+module.exports = (Sequelize, DataTypes) => {
 
-    const users= sequelize.define(
+    const users = Sequelize.define(
         "users",
         {
+            id: {
+                type: DataTypes.INTEGER,
+                autoIncrement: true,
+                primaryKey: true
+            },
 
-            // id:{
-            //     type: DataTypes.INTEGER,
-            //     primaryKey: true,
-            //     autoIncreament: true,
-            //     allowNull: true
-            //   },
-
-            timestamp:false,
             email: {
                 type: DataTypes.STRING,
                 allowNull: true
             },
 
-            first_name: {
+            firstName: {
                 type: DataTypes.STRING,
                 allowNull: true
             },
 
-            last_name: {
+            lastName: {
                 type: DataTypes.STRING,
                 allowNull: true
-
             },
 
-            birthday_date: {
+            birthdayDate: {
                 type: DataTypes.DATE,
                 allowNull: true
             },
 
-            location: {
-                type: DataTypes.STRING,
-                allowNull: true
-
-            },
-
-            created_at: {
-                type: DataTypes.DATE,
+            timezoneOffset: {
+                type: DataTypes.INTEGER,
                 allowNull: true
             },
 
-            updated_at: {
-                type: DataTypes.DATE,
-                allowNull: true
-            },
+
         },
         {
             tableName: 'users',
+            underscored: true,
         }
     );
-        return users;
+
+    return users;
 };
+
+
