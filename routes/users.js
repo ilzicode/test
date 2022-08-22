@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 uuidv4();
+const db = require('../models');
 
 const bodyParser = require('body-parser');
 const Validator = require("fastest-validator");
@@ -11,9 +12,6 @@ const { users, cronEmail, sequelize } = require("../models");
 
 var moment = require('moment');
 
-router.put('/', async(req, res, next) => {
-
-})
 
 // POST
 
@@ -153,6 +151,65 @@ router.delete('/', async (req, res, next) => {
 
     }
 })
+
+router.put('/:id', async (req, res, next) => {
+
+
+    try {
+        const id = req.params.id;
+
+        let user = await users.findByPk(id);
+
+        if (!user) {
+            return res.status(404).json({
+                status: 404,
+                message: 'user not found'
+            })
+        }
+
+        //validation
+        const schema = {
+            email: "email|required|unique",
+            firstName: "string|required",
+            lastName: "string|optional",
+            birthdayDate: "string|required",
+            timezoneOffset: "number|required",
+        };
+
+        const validate = v.validate(req.body, schema);
+
+        if (validate.length) {
+            return res.status(400).json({
+                error: validate,
+                data: req.body
+            });
+        }
+
+        let updateData = await users.update(
+            {
+                email: req.body.email,
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,            },
+            {
+              where: {
+                id:  req.params.id,
+              },
+            }
+        );
+
+        res.json({
+            status: 200,
+            message: "success update",
+            updateData: updateData
+        })
+
+    } catch (error) {
+        console.log(error);
+    }
+
+
+});
+
 
 module.exports = router;
 

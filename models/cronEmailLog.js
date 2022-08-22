@@ -25,11 +25,6 @@ module.exports =(Sequelize, DataTypes)=>{
                 allowNull: true
               },
 
-              year: {
-                type: DataTypes.STRING,
-                allowNull: true
-              },
-
               response: {
                 type: DataTypes.STRING,
                 allowNull: true

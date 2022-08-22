@@ -16,6 +16,8 @@ const bodyParser = require('body-parser');
 const Validator = require("fastest-validator");
 const v = new Validator();
 
+const axiosRetry = require("axios-retry");
+const users = require('../models/users');
 
 // POST
 router.post('/', async (req, res, next) => {
@@ -39,17 +41,16 @@ router.post('/', async (req, res, next) => {
         var data = await db.sequelize.query(
             'SELECT * FROM `users` LEFT JOIN `cron_email` on `users`.`id` = `cron_email`.`users_id` WHERE `cron_email`.`type`="birthday" and `cron_email`.`sending_email_server_time` > ' + "'" + nowDateTime + "'" + ' and `cron_email`.`year` <= ' + "'" + nowYear + "'" + ';', { type: QueryTypes.SELECT });
 
-
-
         await data.forEach(element => {
 
             try {
+                axiosRetry(axios, { retries: 10 });
 
                 axios.post('https://email-service.digitalenvision.com.au/send-email', {
                     email: element.email,
                     message:  "Hey, "+ element.firstName + ", " + element.lastName +" it’s your birthday"
 
-                }, { timeout: 5000 }
+                }, { timeout: 3000 }
                 ).then(function (response) {
 
                     var responseMsg = response.data;
@@ -123,5 +124,7 @@ router.post('/', async (req, res, next) => {
 
 
 })
+
+
 
 module.exports = router;

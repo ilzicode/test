@@ -34,10 +34,6 @@ module.exports = (Sequelize, DataTypes) => {
                 allowNull: true
             },
 
-            sendingEmailServerTime: {
-                type: DataTypes.DATE,
-                allowNull: true
-            },
 
         },
         {

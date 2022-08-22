@@ -48,7 +48,6 @@ module.exports = (sequelize, DataTypes) => {
 			allowNull: true
 		},
 
-
 	}, {
 		sequelize,
 		modelName: 'cronEmail',
