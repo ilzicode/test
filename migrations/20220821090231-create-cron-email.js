@@ -30,11 +30,6 @@ module.exports = {
                 allowNull: true
             },
 
-            is_send: {
-                type: Sequelize.STRING,
-                allowNull: true
-            },
-
             year: {
                 type: Sequelize.STRING,
                 allowNull: true,
