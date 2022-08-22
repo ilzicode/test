@@ -1,20 +1,13 @@
 var express = require('express');
 var router = express.Router();
-const { v4: uuidv4 } = require('uuid');
-uuidv4();
-const db = require('../models');
-
-const bodyParser = require('body-parser');
+var moment = require('moment');
 const Validator = require("fastest-validator");
 const v = new Validator();
-
-const { users, cronEmail, sequelize } = require("../models");
-
-var moment = require('moment');
-
+const { users, cronEmail, sequelize,db } = require("../models");
+const { v4: uuidv4 } = require('uuid');
+const bodyParser = require('body-parser');
 
 // POST
-
 router.post('/', async (req, res, next) => {
 
     try {
@@ -36,7 +29,7 @@ router.post('/', async (req, res, next) => {
             });
         }
 
-        // server timezone Jakarta +7 GMT //420/ 7
+        // server timezone Jakarta +7 GMT (-420/60)
         const serverTimezoneOffset = -420;
 
         const differentInMinutes = serverTimezoneOffset - req.body.timezoneOffset;
@@ -44,7 +37,9 @@ router.post('/', async (req, res, next) => {
         let sendTimeGMT7 = moment(req.body.birthdayDate.slice(0, 10) + " 09:00:00", "YYYY-MM-DD hh:mm:ss").add(differentInMinutes, 'minutes').format('YYYY-MM-DD hh:mm:ss');
 
         let transaction;
+
         try {
+
             transaction = await sequelize.transaction();
             const user = await users.create(req.body, { transaction });
 
@@ -58,105 +53,92 @@ router.post('/', async (req, res, next) => {
             await transaction.commit();
 
         } catch (err) {
-            console.log('error');
+
             if (transaction) {
                 await transaction.rollback();
             }
 
+            console.log('error');
             console.error(err.message);
 
-            res.status(400).json({
+            return res.status(400).json({
                 message: err.message,
                 data: req.body
             })
 
         }
 
-        res.json({
+        return res.json({
             status: 200,
             message: 'berhasil',
             data: req.body,
         })
 
-
-    } catch (error) {
-
+    } catch (err) {
+        console.log('error');
+        console.error(err.message);
     }
-
-
-
-
-
-
 
 })
 
+// DELETE
+router.delete('/:id', async (req, res, next) => {
 
-router.delete('/', async (req, res, next) => {
+    const id = parseInt(req.params.id);
+
+    if (!id) {
+        return res.status(400).json({
+            message: 'error: please input a valid id',
+        })
+    }
+
+    let transaction;
 
     try {
 
-        const schema = {
-            email: "email|required",
-        };
+        transaction = await sequelize.transaction();
 
-        const validate = v.validate(req.body, schema);
+        userData = await users.destroy({
+            where: { id: id },
+            transaction
+        });
 
-        if (validate.length) {
-            return res.status(400).json({
-                error: validate,
-                data: req.body
-            });
+        await cronEmail.destroy({
+            where: { id: id },
+            transaction
+        });
+
+        await transaction.commit();
+        console.log('success delete id : ' + id);
+
+    } catch (err) {
+
+        if (transaction) {
+            await transaction.rollback();
         }
 
-        let transaction;
-        try {
-            transaction = await sequelize.transaction();
+        console.log(err);
 
-            const test = await users.destroy({
-                where: { email: req.body.email }, transaction
-            });
-
-            // delete related database jg harusnya..
-
-            // await City.destroy({
-            //     where: { email:req.body.email }, transaction
-            // });
-
-            console.log('success');
-            await transaction.commit();
-
-        } catch (err) {
-            console.log('error');
-            if (transaction) {
-                await transaction.rollback();
-            }
-
-            console.error(err.message);
-
-            res.status(400).json({
-                message: err.message,
-                data: req.body
-            })
-
-        }
-
-        res.json({
-            status: 200,
-            message: 'berhasil hapus data',
-            data: req.body,
+        return res.status(400).json({
+            message: err.message,
+            data: userData
         })
 
-    } catch (error) {
-
     }
+
+    return res.json({
+        status: 200,
+        message: 'success delete id : ' + id,
+    })
+
 })
 
+// PUT (update)
 router.put('/:id', async (req, res, next) => {
 
-
     try {
-        const id = req.params.id;
+
+        const id = parseInt(req.params.id);
 
         let user = await users.findByPk(id);
 
@@ -189,27 +171,30 @@ router.put('/:id', async (req, res, next) => {
             {
                 email: req.body.email,
                 firstName: req.body.firstName,
-                lastName: req.body.lastName,            },
+                lastName: req.body.lastName,
+            },
             {
-              where: {
-                id:  req.params.id,
-              },
+                where: {
+                    id: req.params.id,
+                },
             }
         );
 
-        res.json({
+        return res.json({
             status: 200,
             message: "success update",
             updateData: updateData
         })
 
-    } catch (error) {
-        console.log(error);
+    } catch (err) {
+        console.log(err);
+        return res.status(400).json({
+            status: 404,
+            message: err
+        })
     }
 
-
 });
-
 
 module.exports = router;
 
