@@ -10,8 +10,4 @@ RUN npm install --silent
 
 COPY . ./
 
-
-# CMD ["cd routes","node", "sendmail.js"]
-
-
 EXPOSE 3000
