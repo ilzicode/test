@@ -5,15 +5,11 @@ var fs = require('fs');
 console.log('task running');
 
 var writeStream = fs.createWriteStream("script_is_running");
-writeStream.write("Hi, Digital Envision !!");
+writeStream.write("Hi,  Digital Envision !! ");
 writeStream.end();
-const path = './script_is_running'
+const path = './script_is_running';
 
-// */15 * * * *   <-- 15 minutes default setup
-// /10 * * * * *  <-- 10 seconds testing purposes
-// using file create/check/delete to avoid race conditions
-
-cron.schedule('*/15 * * * *', () => {
+cron.schedule('*/10 * * * * *', () => {
 
     try {
 

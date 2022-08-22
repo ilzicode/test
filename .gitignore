@@ -2,3 +2,4 @@ node_modules
 docker
 volumes
 package-lock.json
+.env
